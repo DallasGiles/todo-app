@@ -170,7 +170,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   refreshTasks();
 };
-  
+
+const toggleRepeatOptions = () => {
+    if (taskTypeSelect.value === 'recurring') {
+      repeatOptionsDiv.style.display = 'block';
+    } else {
+      repeatOptionsDiv.style.display = 'none';
+    }
+  };
+
     const updateRecurringTask = (task) => {
       const today = new Date().toISOString().split('T')[0];
       const taskDueDate = new Date(task.dueDate);
@@ -188,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
       task.lastUpdated = today;
       task.status = 'todo'; // Reset status for recurring tasks
     };
-  
+
     const showEditModal = () => {
       if (!selectedTask) return;
   
@@ -260,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Initialize the app
     setDefaultDate();
+    taskTypeSelect.addEventListener('change', toggleRepeatOptions);
     searchInput.addEventListener('input', refreshTasks);
     filterDropdown.addEventListener('change', refreshTasks);
     editTaskButton.addEventListener('click', showEditModal);
