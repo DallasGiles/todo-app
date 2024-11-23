@@ -18,8 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskDetails = document.getElementById('taskDetails');
     const editTaskButton = document.getElementById('editTaskButton');
   
-    let selectedTask = null; 
+    const editModal = document.getElementById('editModal');
+    const editTaskNameInput = document.getElementById('editTaskName');
+    const editTaskDescriptionInput = document.getElementById('editTaskDescription');
+    const saveEditButton = document.getElementById('saveEditButton');
+    const cancelEditButton = document.getElementById('cancelEditButton');
   
+    let selectedTask = null; // Track the currently selected task
+  
+    // Set default date to the current day
     const setDefaultDate = () => {
       const today = new Date().toISOString().split('T')[0];
       dueDateInput.value = today;
@@ -36,23 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return new Date(dueDate) < new Date(today);
     };
   
-    const calculateDaysRemaining = (dueDate) => {
-      if (!dueDate) return { text: 'No due date', className: 'on-time' };
-  
-      const today = new Date().setHours(0, 0, 0, 0);
-      const dueDateTime = new Date(dueDate).setHours(0, 0, 0, 0);
-      const differenceInMs = dueDateTime - today;
-      const differenceInDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
-  
-      if (differenceInDays > 0) return { text: `${differenceInDays} day(s) remaining`, className: 'on-time' };
-      if (differenceInDays === 0) return { text: 'Due today!', className: 'due-today' };
-      return { text: `Overdue by ${Math.abs(differenceInDays)} day(s)`, className: 'overdue' };
-    };
-  
     const refreshTasks = () => {
       const tasks = getStoredTasks();
       const today = new Date().toISOString().split('T')[0];
   
+      // Auto-update recurring tasks
       tasks.forEach((task) => {
         if (task.repeat !== 'none' && task.lastUpdated !== today) {
           updateRecurringTask(task);
@@ -61,9 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
       saveTasks(tasks);
   
+      // Apply filtering and search
       const filteredTasks = filterTasks(tasks);
   
-     
+      // Clear task lists
       overdueTasksList.innerHTML = '';
       todoTasksList.innerHTML = '';
       inProgressTasksList.innerHTML = '';
@@ -75,13 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
       filteredTasks.forEach((task) => {
         const listItem = document.createElement('li');
         listItem.dataset.priority = task.priority;
-  
-       
-        const { text: daysRemaining, className } = calculateDaysRemaining(task.dueDate);
-  
         listItem.innerHTML = `
           ${task.name} (${task.type === 'recurring' ? task.repeat : `Due: ${task.dueDate}`})
-          <span class="countdown ${className}">${daysRemaining}</span>
           <div class="task-actions">
             <button class="${task.status === 'completed' ? 'complete-btn' : 'in-progress-btn'}" 
               data-id="${task.id}">
@@ -91,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
   
-        
+        // Add event listeners
         listItem.addEventListener('click', () => displayTaskDescription(task));
         listItem.querySelector('.complete-btn, .in-progress-btn').addEventListener('click', (e) => {
           e.stopPropagation(); // Prevent triggering the description display
@@ -114,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
   
-      
+      // Toggle overdue column visibility
       overdueColumn.style.display = hasOverdueTasks ? 'block' : 'none';
     };
   
@@ -141,27 +132,44 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   
     const displayTaskDescription = (task) => {
-      selectedTask = task; 
+      selectedTask = task; // Store the currently selected task
       taskNameDisplay.textContent = task.name || 'No task name available';
       taskDetails.textContent = task.description || 'No description available for this task.';
-      editTaskButton.style.display = 'inline'; 
+      editTaskButton.style.display = 'inline'; // Show the edit button
+    };
+  
+    const updateTaskStatus = (id) => {
+      const tasks = getStoredTasks();
+      const task = tasks.find((t) => t.id === id);
+  
+      // Cycle through statuses: todo -> in-progress -> completed -> todo
+      if (task.status === 'todo') {
+        task.status = 'in-progress';
+      } else if (task.status === 'in-progress') {
+        task.status = 'completed';
+      } else {
+        task.status = 'todo';
+      }
+  
+      saveTasks(tasks);
+      refreshTasks();
     };
   
     const deleteTask = (id) => {
-      const tasks = getStoredTasks();
-      const updatedTasks = tasks.filter((t) => t.id !== id); 
-      saveTasks(updatedTasks);
-  
-      // Reset the description section if the deleted task was selected
-      if (selectedTask && selectedTask.id === id) {
-        selectedTask = null;
-        taskNameDisplay.textContent = 'Select a task to view its details';
-        taskDetails.textContent = 'Select a task to view its description.';
-        editTaskButton.style.display = 'none'; 
-      }
-  
-      refreshTasks();
-    };
+  const tasks = getStoredTasks();
+  const updatedTasks = tasks.filter((t) => t.id !== id); // Remove task by id
+  saveTasks(updatedTasks);
+
+  // Reset the description section if the deleted task was selected
+  if (selectedTask && selectedTask.id === id) {
+    selectedTask = null;
+    taskNameDisplay.textContent = 'Select a task to view its details';
+    taskDetails.textContent = 'Select a task to view its description.';
+    editTaskButton.style.display = 'none'; // Hide the edit button
+  }
+
+  refreshTasks();
+};
   
     const updateRecurringTask = (task) => {
       const today = new Date().toISOString().split('T')[0];
@@ -178,7 +186,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   
       task.lastUpdated = today;
-      task.status = 'todo'; 
+      task.status = 'todo'; // Reset status for recurring tasks
+    };
+  
+    const showEditModal = () => {
+      if (!selectedTask) return;
+  
+      // Populate modal fields with the selected task's data
+      editTaskNameInput.value = selectedTask.name;
+      editTaskDescriptionInput.value = selectedTask.description || '';
+      editModal.classList.remove('hidden'); // Show the modal
+    };
+  
+    const hideEditModal = () => {
+      editModal.classList.add('hidden'); // Hide the modal
+    };
+  
+    const saveTaskEdits = () => {
+      if (!selectedTask) return;
+  
+      const newName = editTaskNameInput.value.trim();
+      const newDescription = editTaskDescriptionInput.value.trim();
+  
+      if (newName) selectedTask.name = newName;
+      selectedTask.description = newDescription;
+  
+      const tasks = getStoredTasks();
+      const taskIndex = tasks.findIndex((t) => t.id === selectedTask.id);
+      if (taskIndex !== -1) {
+        tasks[taskIndex] = selectedTask; // Update task in storage
+        saveTasks(tasks);
+        refreshTasks();
+        displayTaskDescription(selectedTask); // Refresh the display
+      }
+  
+      hideEditModal(); // Hide the modal after saving
     };
   
     addTaskButton.addEventListener('click', () => {
@@ -203,8 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dueDate: dueDate || null,
         priority: taskPriority,
         description: taskDescription || null,
-        status: 'todo', 
-        lastUpdated: null, 
+        status: 'todo', // New tasks start in the "To-Do" column
+        lastUpdated: null, // Track when the task was last updated
       });
   
       saveTasks(tasks);
@@ -220,6 +262,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setDefaultDate();
     searchInput.addEventListener('input', refreshTasks);
     filterDropdown.addEventListener('change', refreshTasks);
+    editTaskButton.addEventListener('click', showEditModal);
+    saveEditButton.addEventListener('click', saveTaskEdits);
+    cancelEditButton.addEventListener('click', hideEditModal);
   
     refreshTasks();
   });
