@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Task Manager</h1>
+        <p>Organize your tasks efficiently and stay productive</p>
+      </header>
+  <div class="app">
+    <div class="task-input">
+        <input type="text" id="taskName" placeholder="Task Name" />
+        <select id="taskType">
+          <option value="one-time">One-Time</option>
+          <option value="recurring">Recurring</option>
+        </select>
+        <select id="taskPriority">
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+          </select>
+        <div id="repeatOptions" style="display: none;">
+          <select id="taskRepeat">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <textarea id="taskDescription" placeholder="Add an optional description..."></textarea>
+        <input type="date" id="dueDate" />
+        <button id="addTask">Add Task</button>
+      </div>
+      <div class="task-controls">
+        <input type="text" id="searchTasks" placeholder="Search tasks by name..." />
+        <select id="filterTasks">
+          <option value="all">All Tasks</option>
+          <option value="todo">To-Do</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="overdue">Overdue</option>
+          <option value="high">High Priority</option>
+          <option value="medium">Medium Priority</option>
+          <option value="low">Low Priority</option>
+          <option value="one-time">One-Time</option>
+          <option value="recurring">Recurring</option>
+        </select>
+      </div>
+      <div class="task-board">
+        <div class="task-column" id="overdueColumn">
+          <h2>Overdue</h2>
+          <ul id="overdueTasks"></ul>
+        </div>
+        <div class="task-column" id="todoColumn">
+          <h2>To-Do</h2>
+          <ul id="todoTasks"></ul>
+        </div>
+        <div class="task-column" id="inProgressColumn">
+          <h2>In Progress</h2>
+          <ul id="inProgressTasks"></ul>
+        </div>
+        <div class="task-column" id="completedColumn">
+          <h2>Completed</h2>
+          <ul id="completedTasks"></ul>
+        </div>
+      </div>
+  </div>
+  <div id="descriptionSection">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 id="taskNameDisplay">Select a task to view its details</h2>
+      <button id="editTaskButton" style="display: none;">Edit</button>
+    </div>
+    <p id="taskDetails"></p>
+  </div>
+
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Edit Task</h3>
+      <label for="editTaskName">Task Name</label>
+      <input type="text" id="editTaskName" />
+      <label for="editTaskDescription">Task Description</label>
+      <textarea id="editTaskDescription"></textarea>
+      <div class="modal-actions">
+        <button id="saveEditButton">Save</button>
+        <button id="cancelEditButton">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <footer class="app-footer">
+    <p>&copy; 2024 Dallas Giles. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
