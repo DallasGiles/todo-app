@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskRepeatSelect = document.getElementById('taskRepeat');
     const taskPrioritySelect = document.getElementById('taskPriority');
     const dueDateInput = document.getElementById('dueDate');
+    const addSubsetTaskButton = document.getElementById('addSubsetTask'); 
     const taskDescriptionInput = document.getElementById('taskDescription');
     const addTaskButton = document.getElementById('addTask');
     const searchInput = document.getElementById('searchTasks');
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inProgressTasksList = document.getElementById('inProgressTasks');
     const completedTasksList = document.getElementById('completedTasks');
     const overdueColumn = document.getElementById('overdueColumn');
+    const subsetTasksList = document.getElementById('subsetTasks');
     const taskNameDisplay = document.getElementById('taskNameDisplay');
     const taskDetails = document.getElementById('taskDetails');
     const editTaskButton = document.getElementById('editTaskButton');
@@ -26,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
     let selectedTask = null; // Track the currently selected task
   
+
+    
     // Set default date to the current day
     const setDefaultDate = () => {
       const today = new Date().toISOString().split('T')[0];
@@ -34,9 +38,42 @@ document.addEventListener('DOMContentLoaded', () => {
   
     const getStoredTasks = () => JSON.parse(localStorage.getItem('tasks')) || [];
     const saveTasks = (tasks) => localStorage.setItem('tasks', JSON.stringify(tasks));
+    const getStoredSubsetTasks = () => JSON.parse(localStorage.getItem('subsetTasks')) || [];
+    const saveSubsetTasks = (tasks) => localStorage.setItem('subsetTasks', JSON.stringify(tasks));
   
     const generateTaskId = () => `task-${Date.now()}`;
   
+    const refreshSubsetTasks = () => {
+        const subsetTasks = getStoredSubsetTasks();
+        subsetTasksList.innerHTML = '';
+
+        subsetTasks.forEach((task) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = task.name;
+            subsetTasksList.appendChild(listItem);
+        });
+    };
+
+    addSubsetTaskButton.addEventListener('click', () => {
+        const subsetTaskName = taskNameInput.value.trim();
+
+        if (!subsetTaskName) {
+            alert('Please enter a name for the subset task.');
+            return;
+        }
+
+        const subsetTasks = getStoredSubsetTasks();
+        subsetTasks.push({
+            id: generateTaskId(),
+            name: subsetTaskName,
+        });
+
+        saveSubsetTasks(subsetTasks);
+        taskNameInput.value = ''; // Clear the input field
+        refreshSubsetTasks();
+    });
+
+
     const isOverdue = (dueDate) => {
       if (!dueDate) return false;
       const today = new Date().toISOString().split('T')[0];
@@ -276,4 +313,5 @@ const toggleRepeatOptions = () => {
     cancelEditButton.addEventListener('click', hideEditModal);
   
     refreshTasks();
+    refreshSubsetTasks();
   });

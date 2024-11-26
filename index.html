@@ -11,6 +11,10 @@
         <h1>Task Manager</h1>
         <p>Organize your tasks efficiently and stay productive</p>
       </header>
+      <div class="task-column" id="subsetTasksColumn">
+        <h2>Subset Tasks</h2>
+        <ul id="subsetTasks"></ul>
+      </div>
   <div class="app">
     <div class="task-input">
         <input type="text" id="taskName" placeholder="Task Name" />
@@ -32,7 +36,10 @@
         </div>
         <textarea id="taskDescription" placeholder="Add an optional description..."></textarea>
         <input type="date" id="dueDate" />
-        <button id="addTask">Add Task</button>
+        <div class="task-buttons">
+            <button id="addTask">Add Task</button>
+            <button id="addSubsetTask">+ Add Subset</button>
+        </div>
       </div>
       <div class="task-controls">
         <input type="text" id="searchTasks" placeholder="Search tasks by name..." />
